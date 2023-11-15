@@ -15,6 +15,7 @@ import (
 type ConcertTicket struct {
 	ConcertName string
 	Price       float64
+	Class       string
 }
 
 type User struct {
@@ -53,7 +54,7 @@ func formatCurrency(amount float64) string {
 
 func buyTicket(user User, ticket ConcertTicket, quantity int, mainWindow fyne.Window, purchaseList *fyne.Container, totalPurchaseLabel *widget.Label) {
 	totalCost := ticket.Price * float64(quantity)
-	message := fmt.Sprintf("Pembelian tiket atas nama  %s (%s) untuk konser %s sejumlah %d dengan total biaya %s", user.Name, user.Email, ticket.ConcertName, quantity, formatCurrency(totalCost))
+	message := fmt.Sprintf("Pembelian tiket atas nama  %s (%s) untuk konser %s kelas %s sejumlah %d dengan total biaya %s", user.Name, user.Email, ticket.ConcertName, ticket.Class, quantity, formatCurrency(totalCost))
 
 	dialog.ShowInformation("Pembelian Tiket", message, mainWindow)
 
@@ -73,7 +74,11 @@ func main() {
 	myApp := app.New()
 	myWindow := myApp.NewWindow("Pembelian Tiket Konser")
 
-	concertTicket := ConcertTicket{ConcertName: "Konser A", Price: 100000.0}
+	concertTickets := []ConcertTicket{
+		{ConcertName: "Konser A", Price: 100000.0, Class: "Reguler"},
+		{ConcertName: "Konser A", Price: 150000.0, Class: "Premium"},
+		{ConcertName: "Konser A", Price: 200000.0, Class: "Platinum"},
+	}
 	user := User{Name: "John Doe", Email: "john@example.com"}
 
 	userNameEntry := NewCustomEntry()
@@ -85,6 +90,8 @@ func main() {
 	quantityEntry := NewCustomEntry()
 	quantityEntry.SetPlaceHolder("Jumlah Tiket")
 
+	ticketClassEntry := widget.NewSelect([]string{"Reguler", "Premium", "Platinum"}, func(class string) {})
+
 	purchaseList := container.NewVBox()
 	totalPurchaseLabel := widget.NewLabel("Total Pembelian: Rp. 0")
 
@@ -95,8 +102,16 @@ func main() {
 		quantity := 0
 		fmt.Sscanf(quantityEntry.Text, "%d", &quantity)
 
+		var ticket ConcertTicket
+		for _, t := range concertTickets {
+			if t.Class == ticketClassEntry.Selected {
+				ticket = t
+				break
+			}
+		}
+
 		if quantity > 0 {
-			buyTicket(user, concertTicket, quantity, myWindow, purchaseList, totalPurchaseLabel)
+			buyTicket(user, ticket, quantity, myWindow, purchaseList, totalPurchaseLabel)
 		} else {
 			dialog.ShowError(fmt.Errorf("Jumlah tiket harus lebih dari 0"), myWindow)
 		}
@@ -107,6 +122,7 @@ func main() {
 			{Text: "Nama Pengguna", Widget: userNameEntry},
 			{Text: "Email", Widget: emailEntry},
 			{Text: "Jumlah Tiket", Widget: quantityEntry},
+			{Text: "Kelas Tiket", Widget: ticketClassEntry},
 		},
 	}
 
