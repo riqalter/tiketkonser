@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/mail"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -54,7 +55,15 @@ func formatCurrency(amount float64) string {
 
 func buyTicket(user User, ticket ConcertTicket, quantity int, mainWindow fyne.Window, purchaseList *fyne.Container, totalPurchaseLabel *widget.Label) {
 	totalCost := ticket.Price * float64(quantity)
-	message := fmt.Sprintf("Pembelian tiket atas nama  %s (%s) untuk konser %s kelas %s sejumlah %d dengan total biaya %s", user.Name, user.Email, ticket.ConcertName, ticket.Class, quantity, formatCurrency(totalCost))
+
+	// Validate email
+	_, err := mail.ParseAddress(user.Email)
+	if err != nil {
+		dialog.ShowError(fmt.Errorf("Email tidak valid: %v", err), mainWindow)
+		return
+	}
+
+	message := fmt.Sprintf("Pembelian tiket atas nama %s (%s) untuk konser %s kelas %s sejumlah %d dengan total biaya %s", user.Name, user.Email, ticket.ConcertName, ticket.Class, quantity, formatCurrency(totalCost))
 
 	dialog.ShowInformation("Pembelian Tiket", message, mainWindow)
 
@@ -74,12 +83,14 @@ func main() {
 	myApp := app.New()
 	myWindow := myApp.NewWindow("Pembelian Tiket Konser")
 
+	title := widget.NewLabelWithStyle("Form Pembelian Tiket Konser", fyne.TextAlignCenter, fyne.TextStyle{Bold: true, Italic: false})
+
 	concertTickets := []ConcertTicket{
 		{ConcertName: "Konser A", Price: 100000.0, Class: "Reguler"},
 		{ConcertName: "Konser A", Price: 150000.0, Class: "Premium"},
 		{ConcertName: "Konser A", Price: 200000.0, Class: "Platinum"},
 	}
-	user := User{Name: "John Doe", Email: "john@example.com"}
+	user := User{Name: "Contoh Nama", Email: "nama@domainkeren.com"}
 
 	userNameEntry := NewCustomEntry()
 	userNameEntry.SetPlaceHolder("Nama Pengguna")
@@ -88,7 +99,7 @@ func main() {
 	emailEntry.SetPlaceHolder("Email")
 
 	quantityEntry := NewCustomEntry()
-	quantityEntry.SetPlaceHolder("Jumlah Tiket")
+	quantityEntry.SetPlaceHolder("tiket yang dibeli (angka)")
 
 	ticketClassEntry := widget.NewSelect([]string{"Reguler", "Premium", "Platinum"}, func(class string) {})
 
@@ -127,6 +138,7 @@ func main() {
 	}
 
 	myWindow.SetContent(container.New(layout.NewCenterLayout(), container.NewVBox(
+		title,
 		form,
 		buyButton,
 		widget.NewLabel("Daftar Pembelian:"),
