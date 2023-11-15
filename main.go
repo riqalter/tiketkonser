@@ -49,7 +49,7 @@ func (e *CustomEntry) MinSize() fyne.Size {
 func formatCurrency(amount float64) string {
 	tag := language.MustParse("id-ID")
 	p := message.NewPrinter(tag)
-	return p.Sprintf("Rp. %v", amount)
+	return p.Sprintf("Rp. %.0f", amount)
 }
 
 func buyTicket(user User, ticket ConcertTicket, quantity int, mainWindow fyne.Window, purchaseList *fyne.Container, totalPurchaseLabel *widget.Label) {
