@@ -10,6 +10,6 @@ Ada penambahan **17 baris** kode dibandingkan dengan versi sebelumnya yang tidak
 - [x] 5 Total Function (1 Main Function)
 
 ### Menggunakan
-- [x] 1 Standard Library
+- [x] 2 Standard Library
 - [x] 1 External Library
 - [x] 2 Golang Packages
